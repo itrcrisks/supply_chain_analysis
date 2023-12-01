@@ -1,0 +1,38 @@
+# to install this environment:
+# conda env create -f environment.yml
+name: supply_chain_analysis
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pip:  # delegate to pip for non-conda packages
+    - nismod-snail==0.5.0 # vector-raster intersections
+  - cartopy==0.21.1     # Spatial map plotting
+  - cython==0.29.28     # c--python interface
+  - contextily          # basemaps for plots
+  - gdal>=3.3           # command-line tools for spatial data
+  - geopandas==0.13.2   # geospatial dataframes
+  - geopy==2.3.0        # geocoding client
+  - jenkspy==0.3.3      # Fisher-jenkins plotting
+  - jq                  # JSON processing tool
+  - matplotlib==3.7.2   # basic plotting
+  - numpy~=1.22.0       # data arrays
+  - openpyxl==3.1.2     # Excel file format
+  - osmium-tool==1.14.0 # openstreetmap extracts
+  - pandas==2.0.3       # dataframes
+  - pyarrow             # parquet file format, Arrow data exchange
+  - aws-sdk-cpp=1.8.186
+  # workaround for a bug in aws-sdk-cpp, which is used by pyarrow
+  # https://issues.apache.org/jira/browse/ARROW-15141
+  # https://github.com/apache/arrow/pull/14157
+  - pyogrio             # vectorised geospatial file i/o
+  - pyproj>=3.3.1       # geographic projections
+  - pyrosm              # python OpenStreetMap network reader
+  - pytest              # testing
+  - pytest-xdist        # parallelise testing across CPUs
+  - scipy               # scientific computing library
+  # https://github.com/snakemake/snakemake/issues/1891
+  - tqdm==4.62.3        # progress bars
