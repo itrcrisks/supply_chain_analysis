@@ -28,4 +28,9 @@ Activate it:
 
 Set-up the data folder paths in the `conig.json` file, dervied from the `conig.template.json` 
 
+With the `scripts` folder the codes do the following:
+- `Exposures` - Contains scripts to do intersections between the points/polygons and WRI floodmaps
+- `Summarise` - Contains scripts to summarise the results
+- `Plot` - Scripts to plot the results  
+
 
