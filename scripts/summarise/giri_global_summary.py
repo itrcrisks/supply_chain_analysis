@@ -16,7 +16,6 @@ def main(config):
     processed_data_path = config['paths']['data']
     output_path = config['paths']['output']
 
-    # climate_idx_cols = ['model','rcp', 'epoch','rp'] # The climate columns
     climate_idx_cols = ['rcp','rp'] # The climate columns
 
     exposure_files = ["supply_chain_sites_all"]
@@ -31,8 +30,6 @@ def main(config):
         if os.path.exists(stats_path) == False:
             os.mkdir(stats_path)
 
-        # hazard_data_details = pd.read_csv(os.path.join(processed_data_path,
-        #                                 "aqueduct_river.csv"),encoding="latin1")
         hazard_data_details = pd.read_csv(os.path.join(processed_data_path,
                                         "flood_river_giri.csv"),encoding="latin1")
         hazard_keys = hazard_data_details["key"].values.tolist()
@@ -51,23 +48,21 @@ def main(config):
         exposures = pd.read_parquet(os.path.join(output_path,
                                 "sites_flood_intersections",
                                 f"{file}_splits__flood_river_giri__nodes.geoparquet")) 
-        # exposures.drop("geometry",axis=1,inplace=True)
-        # exposures.to_csv(os.path.join(stats_path,
-        #                     f"{file}_splits__aqueduct_river__nodes_flood_depths.csv"),index=False) 
         exposures = exposures[[asset_id]+hazard_keys]
         exposures = pd.merge(exposures,assets[index_columns],how="left",on=[asset_id])
         exposure_stats = add_rows_and_transpose(exposures,hazard_data_details,
                                     index_columns,
                                     hazard_keys,
                                     climate_idx_cols,value_name="flood_depth_m")
+        exposure_stats["flood_depth_m"] = 0.01*exposure_stats["flood_depth_m"]
         exposure_stats = exposure_stats[exposure_stats["flood_depth_m"] > 0]
         exposure_stats["flood_count"] = 1
         exposure_stats.to_csv(os.path.join(stats_path,
-                            f"{file}_climate_model_rcp_rp_epoch_flood_depth.csv"),
+                            f"{file}_climate_rcp_rp_flood_depth.csv"),
                             index=False)
         exposures[hazard_keys] = np.where(exposures[hazard_keys]>0,1,0)
         exposures.to_csv(os.path.join(stats_path,
-                            f"{file}_splits__aqueduct_river__nodes_flood_binary.csv"),
+                            f"{file}_splits__flood_river_giri__nodes_flood_binary.csv"),
                             index=False)
 
         stats_combinations = [
@@ -75,31 +70,27 @@ def main(config):
                                 'type':'exposure_depths',
                                 'addby':[],
                                 'groupby':index_columns + climate_idx_cols,
-                                'file_name':'exposures_flood_depths_by_model_rcp_rp_epoch.xlsx',
-                                'generate_quantiles':True 
+                                'file_name':'exposures_flood_depths_by_rcp_rp.xlsx',
+                                'generate_quantiles':False 
                                 },
                                 {
                                 'type':'exposure_expected_depths',
                                 'addby':[],
                                 'groupby':index_columns + [
                                             'rcp',
-                                            'model',
-                                            'epoch'
                                         ],
-                                'file_name':'exposures_expected_flood_depths_by_model_rcp_epoch.xlsx',
-                                'generate_quantiles':True 
+                                'file_name':'exposures_expected_flood_depths_by_rcp.xlsx',
+                                'generate_quantiles':False 
                                 },
                                 {
                                 'type':'exposures',
                                 'addby':[],
                                 'groupby':[
                                             'rcp',
-                                            'model',
-                                            'epoch',
                                             'rp'
                                         ],
-                                'file_name':'exposures_numbers_by_model_rcp_rp_epoch.xlsx',
-                                'generate_quantiles':True 
+                                'file_name':'exposures_numbers_by_rcp.xlsx',
+                                'generate_quantiles':False
                                 },
                                 {
                                 'type':'exposures',
@@ -107,12 +98,10 @@ def main(config):
                                 'groupby':[
                                             'country',
                                             'rcp',
-                                            'model',
-                                            'epoch',
                                             'rp'
                                         ],
-                                'file_name':'exposures_numbers_by_country_model_rcp_rp_epoch.xlsx',
-                                'generate_quantiles':True 
+                                'file_name':'exposures_numbers_by_country_rcp_rp.xlsx',
+                                'generate_quantiles':False 
                                 },
                                 {
                                 'type':'exposures',
@@ -121,12 +110,10 @@ def main(config):
                                             f'{company_id}',
                                             'site_type',
                                             'rcp',
-                                            'model',
-                                            'epoch',
                                             'rp'
                                         ],
-                                'file_name':'exposures_numbers_by_company_model_rcp_rp_epoch.xlsx',
-                                'generate_quantiles':True 
+                                'file_name':'exposures_numbers_by_company_rcp_rp.xlsx',
+                                'generate_quantiles':False 
                                 },
                                 {
                                 'type':'exposures',
@@ -134,12 +121,10 @@ def main(config):
                                 'groupby':[
                                             'site_type',
                                             'rcp',
-                                            'model',
-                                            'epoch',
                                             'rp'
                                         ],
-                                'file_name':'exposures_numbers_by_site_type_model_rcp_rp_epoch.xlsx',
-                                'generate_quantiles':True 
+                                'file_name':'exposures_numbers_by_site_type_rcp_rp.xlsx',
+                                'generate_quantiles':False 
                                 },
                                 {
                                 'type':'exposures',
@@ -150,12 +135,10 @@ def main(config):
                                             'country',
                                             'iso_code',
                                             'rcp',
-                                            'model',
-                                            'epoch',
                                             'rp'
                                         ],
-                                'file_name':'exposures_numbers_by_company_country_model_rcp_rp_epoch.xlsx',
-                                'generate_quantiles':True 
+                                'file_name':'exposures_numbers_by_company_country_rcp_rp.xlsx',
+                                'generate_quantiles':False 
                                 },
                             ]
 
@@ -266,7 +249,7 @@ def main(config):
                 stats_by = "expected_flood_depth_undefended"
             group_and_write_results(values_df,
                 stats_combinations[st]['groupby'],stats_wrtr,
-                quantile_combinations[st]['groupby'],quantile_wrtr,
+                quantile_combinations[st]['groupby'],
                 [stats_by],"exposures",
                 write_values=write_values,
                 generate_groups = True,

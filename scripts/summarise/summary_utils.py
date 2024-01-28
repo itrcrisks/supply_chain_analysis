@@ -115,7 +115,7 @@ def add_rows_and_transpose(df,df_merge,grouping_by_columns,grouped_columns,merge
 
 def group_and_write_results(dataframe,
                         stats_grouping_by,stats_writer,
-                        quantile_grouping_by,quantile_writer,
+                        quantile_grouping_by,
                         grouped,sheetname,
                         add_values=True,write_values=True,generate_groups=True,generate_quantiles=True):
     # options = {}
