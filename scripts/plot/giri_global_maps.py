@@ -1,4 +1,4 @@
-"""Road network risks and adaptation maps
+"""GIRI exposure analysis results
 """
 import os
 import sys

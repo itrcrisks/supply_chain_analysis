@@ -9,6 +9,8 @@ import math
 import numpy as np
 import geopandas as gpd
 import pandas as pd
+import rasterio
+import rioxarray
 import cartopy.crs as ccrs
 from shapely.geometry.point import Point
 import cartopy.io.shapereader as shpreader
@@ -750,3 +752,41 @@ def point_map_plotting_colors_width(ax,df,column,
     print ('* Plotting ',plot_title)
     legend_from_style_spec(ax, styles,fontsize=legend_size,loc='lower left')
     return ax
+
+def plot_raster(ax, tif_path, cmap='viridis', levels=None, colors=None,
+                reproject_transform=None,clip_extent=None):
+    """Plot raster with vectors/labels
+    """
+    # Open raster
+    ds = rioxarray.open_rasterio(tif_path, mask_and_scale=True)
+    if reproject_transform is not None:
+        ds = ds.rio.reproject(f"EPSG:{reproject_transform}")
+    if clip_extent is not None:
+        left, right, bottom, top = clip_extent
+        ds = ds.rio.clip_box(
+            minx=left,
+            miny=bottom,
+            maxx=right,
+            maxy=top,
+        )
+    crs = ccrs.epsg(reproject_transform)
+    # Plot raster
+    if levels is not None and colors is not None:
+        im = ds.plot(
+            ax=ax,
+            levels=levels,
+            colors=colors,
+            transform=crs,
+            alpha=0.6,
+            add_colorbar=False
+        )
+    else:
+        im =ds.plot(
+            ax=ax,
+            cmap=cmap,
+            transform=crs,
+            alpha=0.6,
+            add_colorbar=False
+        )
+
+    return im
